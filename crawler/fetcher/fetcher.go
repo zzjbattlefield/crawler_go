@@ -6,9 +6,14 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 )
 
+var rateLimit = time.Tick(50 * time.Microsecond)
+
+//通过url获取网页内容并返回
 func Fetch(url string) ([]byte, error) {
+	<-rateLimit
 	rsp, err := http.Get(url)
 	if err != nil {
 		panic(err)
