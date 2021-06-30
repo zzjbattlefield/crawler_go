@@ -11,13 +11,13 @@ func (s *QueueScheduler) Submit(r engine.Request) {
 	s.ReqeustChan <- r
 }
 
+func (s *QueueScheduler) WorkerChannel() chan engine.Request {
+	return make(chan engine.Request)
+}
+
 //将worker发送到调度器内部的workerChannel 之后会将它加入到woker队列里
 func (s *QueueScheduler) WorkerReady(w chan engine.Request) {
 	s.WorkerChan <- w
-}
-
-func (s *QueueScheduler) ConfiguereMasterWorkerChan(chan engine.Request) {
-
 }
 
 //启动队列调度器

@@ -1,6 +1,8 @@
 package engine
 
-import "log"
+import (
+	"log"
+)
 
 //并发引擎
 type ConCurrentEngien struct {
@@ -11,9 +13,13 @@ type ConCurrentEngien struct {
 //调度器
 type Scheduler interface {
 	Submit(Request)
-	ConfiguereMasterWorkerChan(chan Request)
-	WorkerReady(chan Request)
+	WorkerChannel() chan Request
+	ReadyNotifier
 	Run()
+}
+
+type ReadyNotifier interface {
+	WorkerReady(chan Request)
 }
 
 func (e *ConCurrentEngien) Run(seeds ...Request) {
@@ -22,7 +28,7 @@ func (e *ConCurrentEngien) Run(seeds ...Request) {
 	//启动调度器
 	e.Scheduler.Run()
 	for i := 0; i < e.WorkerCount; i++ {
-		e.createWorker(out, e.Scheduler)
+		e.createWorker(e.Scheduler.WorkerChannel(), out, e.Scheduler)
 	}
 	for _, r := range seeds {
 		//传入种子页面
@@ -43,12 +49,12 @@ func (e *ConCurrentEngien) Run(seeds ...Request) {
 }
 
 //创建worker并执行,通过channel返回ParserResult
-func (e *ConCurrentEngien) createWorker(out chan ParseResult, s Scheduler) {
-	in := make(chan Request)
+func (e *ConCurrentEngien) createWorker(in chan Request, out chan ParseResult, ready ReadyNotifier) {
+	// in := make(chan Request)
 	go func() {
 		for {
 			//将空闲的worker发送给Scheduler加入到worker队列
-			s.WorkerReady(in)
+			ready.WorkerReady(in)
 			request := <-in
 			result, err := worker(request)
 			if err != nil {
