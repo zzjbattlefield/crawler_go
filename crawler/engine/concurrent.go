@@ -12,18 +12,20 @@ type ConCurrentEngien struct {
 type Scheduler interface {
 	Submit(Request)
 	ConfiguereMasterWorkerChan(chan Request)
+	WorkerReady(chan Request)
+	Run()
 }
 
 func (e *ConCurrentEngien) Run(seeds ...Request) {
-	//先创建并发需要的channel
-	in := make(chan Request)
+	//创建接收返回参数的channel
 	out := make(chan ParseResult)
-	//给Scheduler的channel赋值
-	e.Scheduler.ConfiguereMasterWorkerChan(in)
+	//启动调度器
+	e.Scheduler.Run()
 	for i := 0; i < e.WorkerCount; i++ {
-		e.createWorker(in, out)
+		e.createWorker(out, e.Scheduler)
 	}
 	for _, r := range seeds {
+		//传入种子页面
 		e.Scheduler.Submit(r)
 	}
 	count := 0
@@ -38,13 +40,15 @@ func (e *ConCurrentEngien) Run(seeds ...Request) {
 			e.Scheduler.Submit(request)
 		}
 	}
-
 }
 
 //创建worker并执行,通过channel返回ParserResult
-func (e *ConCurrentEngien) createWorker(in chan Request, out chan ParseResult) {
+func (e *ConCurrentEngien) createWorker(out chan ParseResult, s Scheduler) {
+	in := make(chan Request)
 	go func() {
 		for {
+			//将空闲的worker发送给Scheduler加入到worker队列
+			s.WorkerReady(in)
 			request := <-in
 			result, err := worker(request)
 			if err != nil {
