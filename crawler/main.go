@@ -8,11 +8,11 @@ import (
 
 func main() {
 	e := engine.ConCurrentEngien{
-		Scheduler:   &scheduler.SimpleScheduler{},
+		Scheduler:   &scheduler.QueueScheduler{},
 		WorkerCount: 10,
 	}
 	e.Run(engine.Request{
-		Url: "http://localhost:8080/mock/www.zhenai.com/zhenghun/shanghai",
+		Url: "http://localhost:8080/mock/www.zhenai.com/zhenghun/",
 		// ParserFunc: parser.ParseCityList,
 		ParserFunc: parser.ParserCity,
 	})

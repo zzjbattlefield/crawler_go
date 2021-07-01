@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"crawler/crawler/model"
 	"log"
 )
 
@@ -34,21 +35,23 @@ func (e *ConCurrentEngien) Run(seeds ...Request) {
 		//传入种子页面
 		e.Scheduler.Submit(r)
 	}
-	count := 0
+	profileCount := 0
 	for {
 		result := <-out
 		for _, gotItem := range result.Item {
-			log.Printf("got Item #%d : %v", count, gotItem)
-			count++
+			if _, ok := gotItem.(model.Profile); ok {
+				//只有是人物界面时才打印
+				log.Printf("got profile #%d : %v", profileCount, gotItem)
+				profileCount++
+			}
 		}
 
 		for _, request := range result.Requests {
 			//url去重
 			if isDuplicate(request) {
-				log.Printf("url重复: %s \n", request.Url)
+				// log.Printf("url重复: %s \n", request.Url)
 				continue
 			}
-
 			e.Scheduler.Submit(request)
 		}
 	}

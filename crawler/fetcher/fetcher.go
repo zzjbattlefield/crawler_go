@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
 )
@@ -20,7 +19,7 @@ func Fetch(url string) ([]byte, error) {
 	}
 	defer rsp.Body.Close()
 	if rsp.StatusCode == http.StatusOK {
-		log.Println("fetchUrl:", url)
+		// log.Println("fetchUrl:", url)
 		all, err := ioutil.ReadAll(rsp.Body)
 		if err != nil {
 			return nil, err
