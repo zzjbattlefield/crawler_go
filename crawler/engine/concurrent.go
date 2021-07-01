@@ -43,6 +43,12 @@ func (e *ConCurrentEngien) Run(seeds ...Request) {
 		}
 
 		for _, request := range result.Requests {
+			//url去重
+			if isDuplicate(request) {
+				log.Printf("url重复: %s \n", request.Url)
+				continue
+			}
+
 			e.Scheduler.Submit(request)
 		}
 	}
@@ -64,4 +70,19 @@ func (e *ConCurrentEngien) createWorker(in chan Request, out chan ParseResult, r
 			out <- result
 		}
 	}()
+}
+
+type emptyStruct struct{}
+
+var visitedUrls = make(map[string]emptyStruct)
+
+//判断url是否重复
+func isDuplicate(req Request) bool {
+	if _, ok := visitedUrls[req.Url]; !ok {
+		//没有见过 保存
+		visitedUrls[req.Url] = emptyStruct{}
+		return false
+	} else {
+		return true
+	}
 }
