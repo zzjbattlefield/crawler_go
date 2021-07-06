@@ -16,5 +16,11 @@ type ParseResult struct {
 	//任务列表
 	Requests []Request
 	//网页获取的数据列表
-	Item []interface{}
+	Item []Item
+}
+
+type Item struct {
+	Url     string
+	Id      string
+	PayLoad interface{} //任意字段
 }

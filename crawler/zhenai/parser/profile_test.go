@@ -20,7 +20,7 @@ func TestParseProfile(t *testing.T) {
 	if len(result.Item) != 1 {
 		t.Errorf("Result 最少也有一个内容,但是有%v", result.Item)
 	}
-	profile := result.Item[0].(model.Profile)
+	profile := result.Item[0]
 
 	expected := model.Profile{
 		Name:       "寂寞成影萌宝",

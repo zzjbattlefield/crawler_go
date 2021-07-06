@@ -1,14 +1,12 @@
 package engine
 
-import (
-	"crawler/crawler/model"
-	"log"
-)
+import "crawler/crawler/model"
 
 //并发引擎
 type ConCurrentEngien struct {
 	Scheduler   Scheduler
 	WorkerCount int
+	SaveChan    chan Item
 }
 
 //调度器
@@ -35,14 +33,13 @@ func (e *ConCurrentEngien) Run(seeds ...Request) {
 		//传入种子页面
 		e.Scheduler.Submit(r)
 	}
-	profileCount := 0
 	for {
 		result := <-out
 		for _, gotItem := range result.Item {
-			if _, ok := gotItem.(model.Profile); ok {
-				//只有是人物界面时才打印
-				log.Printf("got profile #%d : %v", profileCount, gotItem)
-				profileCount++
+			if _, ok := gotItem.PayLoad.(model.Profile); ok {
+				go func() {
+					e.SaveChan <- gotItem
+				}()
 			}
 		}
 

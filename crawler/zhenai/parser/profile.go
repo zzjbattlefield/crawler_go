@@ -34,11 +34,11 @@ var carRe = regexp.MustCompile(
 var guessRe = regexp.MustCompile(
 	`<a class="exp-user-name"[^>]*href="(.*album\.zhenai\.com/u/[\d]+)">([^<]+)</a>`)
 
-// var idUrlRe = regexp.MustCompile(
-// 	`.*album\.zhenai\.com/u/([\d]+)`)
+var idUrlRe = regexp.MustCompile(
+	`.*album\.zhenai\.com/u/([\d]+)`)
 
 //解析用户数据
-func ParseProfile(content []byte, name string) engine.ParseResult {
+func ParseProfile(content []byte, name string, url string) engine.ParseResult {
 	profile := model.Profile{}
 	profile.Name = name
 	if age, err := strconv.Atoi(extractString(content, ageRe)); err != nil {
@@ -74,7 +74,13 @@ func ParseProfile(content []byte, name string) engine.ParseResult {
 	profile.Xinzuo = extractString(
 		content, xinzuoRe)
 	result := engine.ParseResult{
-		Item: []interface{}{profile},
+		Item: []engine.Item{
+			{
+				Url:     url,
+				Id:      extractString([]byte(url), idUrlRe),
+				PayLoad: profile,
+			},
+		},
 	}
 
 	matches := guessRe.FindAllSubmatch(content, -1)
@@ -83,7 +89,7 @@ func ParseProfile(content []byte, name string) engine.ParseResult {
 		result.Requests = append(result.Requests, engine.Request{
 			Url: string(match[1]),
 			ParserFunc: func(b []byte) engine.ParseResult {
-				return ParseProfile(b, name)
+				return ParseProfile(b, name, string(match[1]))
 			},
 		})
 	}
