@@ -4,7 +4,7 @@ type Request struct {
 	//从解析器获得的下一个任务的url
 	Url string
 	//从解析器获得的下一个任务的解析器方法地址
-	ParserFunc func([]byte) ParseResult
+	ParserFunc func(content []byte, url string) ParseResult
 }
 
 func NilParser([]byte) ParseResult {

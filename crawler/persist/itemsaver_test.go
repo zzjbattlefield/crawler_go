@@ -30,10 +30,6 @@ func Test_save(t *testing.T) {
 			Car:        "无车",
 		},
 	}
-	err := save(profile)
-	if err != nil {
-		panic(err)
-	}
 	client, err := elastic.NewClient(
 		elastic.SetURL("http://192.168.58.130:9200"),
 		elastic.SetSniff(false),
@@ -41,7 +37,12 @@ func Test_save(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	rsp, err := client.Get().Index("dating_profile").Id(profile.Id).Do(context.Background())
+	err = save(client, "dating_test", profile)
+	if err != nil {
+		panic(err)
+	}
+
+	rsp, err := client.Get().Index("dating_test").Id(profile.Id).Do(context.Background())
 	if err != nil {
 		panic(err)
 	}

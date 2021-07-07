@@ -8,10 +8,14 @@ import (
 )
 
 func main() {
+	itemChannel, err := persist.ItemSaver("dating_profile")
+	if err != nil {
+		panic(err)
+	}
 	e := engine.ConCurrentEngien{
 		Scheduler:   &scheduler.QueueScheduler{},
 		WorkerCount: 100,
-		SaveChan:    persist.ItemSaver(),
+		SaveChan:    itemChannel,
 	}
 	e.Run(engine.Request{
 		Url:        "http://localhost:8080/mock/www.zhenai.com/zhenghun/",

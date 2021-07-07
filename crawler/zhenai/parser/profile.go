@@ -84,13 +84,11 @@ func ParseProfile(content []byte, name string, url string) engine.ParseResult {
 	}
 
 	matches := guessRe.FindAllSubmatch(content, -1)
+	//猜你喜欢页面
 	for _, match := range matches {
-		name := string(match[2])
 		result.Requests = append(result.Requests, engine.Request{
-			Url: string(match[1]),
-			ParserFunc: func(b []byte) engine.ParseResult {
-				return ParseProfile(b, name, string(match[1]))
-			},
+			Url:        string(match[1]),
+			ParserFunc: ProfileParser(string(match[2])),
 		})
 	}
 
@@ -104,4 +102,10 @@ func extractString(content []byte, re *regexp.Regexp) string {
 		return string(match[1])
 	}
 	return ""
+}
+
+func ProfileParser(name string) func(content []byte, url string) engine.ParseResult {
+	return func(c []byte, url string) engine.ParseResult {
+		return ParseProfile(c, url, name)
+	}
 }
